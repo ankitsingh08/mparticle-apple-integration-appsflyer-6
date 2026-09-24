@@ -65,10 +65,7 @@ static NSDictionary *temporaryCustomData = nil;
 
 - (void)setProviderKitInstance:(id)tracker {
     appsFlyerTracker = tracker;
-    if (temporaryCustomData && appsFlyerTracker) {
-        appsFlyerTracker.customData = temporaryCustomData;
-        temporaryCustomData = nil;
-    }
+    [MPKitAppsFlyer flushTemporaryCustomDataIfNeeded];
 }
 
 + (void)setDelegate:(id)delegate {
@@ -88,7 +85,7 @@ static NSDictionary *temporaryCustomData = nil;
     }
 }
 
-+ (void)setCustomData:(NSDictionary *)customData {
++ (void)setCustomData:(NSDictionary * _Nullable)customData {
     if (appsFlyerTracker) {
         appsFlyerTracker.customData = customData;
     } else {
@@ -96,11 +93,18 @@ static NSDictionary *temporaryCustomData = nil;
     }
 }
 
-+ (NSDictionary *)customData {
++ (NSDictionary * _Nullable)customData {
     if (appsFlyerTracker) {
         return appsFlyerTracker.customData;
     } else {
         return temporaryCustomData;
+    }
+}
+
++ (void)flushTemporaryCustomDataIfNeeded {
+    if (temporaryCustomData && appsFlyerTracker) {
+        appsFlyerTracker.customData = temporaryCustomData;
+        temporaryCustomData = nil;
     }
 }
 
@@ -132,11 +136,8 @@ static NSDictionary *temporaryCustomData = nil;
     else {
         appsFlyerTracker.delegate = self;
     }
-    if (temporaryCustomData) {
-        appsFlyerTracker.customData = temporaryCustomData;
-        temporaryCustomData = nil;
-    }
-    
+    [MPKitAppsFlyer flushTemporaryCustomDataIfNeeded];
+
     appsFlyerTracker.deepLinkDelegate = self;
     
     _configuration = configuration;

@@ -30,6 +30,13 @@ final class MPKitAppsFlyerTests: XCTestCase {
         kit = MPKitAppsFlyer()
         kit.configuration = [:]
         mock = AppsFlyerLibMock()
+        MPKitAppsFlyer.setCustomData(nil)
+    }
+
+    override func tearDown() {
+        MPKitAppsFlyer.setCustomData(nil)
+        kit.providerKitInstance = nil
+        super.tearDown()
     }
 
     // MARK: - convertToKeyValuePairs
@@ -433,6 +440,34 @@ final class MPKitAppsFlyerTests: XCTestCase {
         af.providerKitInstance = mock
 
         XCTAssertEqual(mock.lastCustomData?["pre_init_key"] as? String, "pre_init_val")
+    }
+
+    func testClearCustomDataPostInit() {
+        let af = MPKitAppsFlyer()
+        af.providerKitInstance = mock
+
+        let testData: [String: Any] = ["key": "val"]
+        MPKitAppsFlyer.setCustomData(testData)
+        XCTAssertNotNil(MPKitAppsFlyer.customData())
+
+        MPKitAppsFlyer.setCustomData(nil)
+        XCTAssertNil(MPKitAppsFlyer.customData())
+        XCTAssertNil(mock.lastCustomData)
+    }
+
+    func testClearCustomDataPreInit() {
+        let af = MPKitAppsFlyer()
+        af.providerKitInstance = nil
+
+        let testData: [String: Any] = ["key": "val"]
+        MPKitAppsFlyer.setCustomData(testData)
+        XCTAssertNotNil(MPKitAppsFlyer.customData())
+
+        MPKitAppsFlyer.setCustomData(nil)
+        XCTAssertNil(MPKitAppsFlyer.customData())
+
+        af.providerKitInstance = mock
+        XCTAssertNil(mock.lastCustomData)
     }
 
     func checkLogEventParams() {
