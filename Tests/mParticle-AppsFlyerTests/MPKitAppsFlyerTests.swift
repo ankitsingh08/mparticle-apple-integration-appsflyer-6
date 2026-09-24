@@ -403,6 +403,38 @@ final class MPKitAppsFlyerTests: XCTestCase {
         checkLogEventParams()
     }
 
+    // MARK: - customData
+
+    func testSetAndGetCustomDataWithProviderInstance() {
+        let af = MPKitAppsFlyer()
+        af.providerKitInstance = mock
+
+        let testData: [String: Any] = ["key1": "value1", "key2": 123]
+        MPKitAppsFlyer.setCustomData(testData)
+
+        XCTAssertEqual(mock.setCustomDataCallCount, 1)
+        XCTAssertEqual(mock.lastCustomData?["key1"] as? String, "value1")
+        XCTAssertEqual(mock.lastCustomData?["key2"] as? Int, 123)
+
+        let retrievedData = MPKitAppsFlyer.customData()
+        XCTAssertEqual(retrievedData?["key1"] as? String, "value1")
+        XCTAssertEqual(retrievedData?["key2"] as? Int, 123)
+    }
+
+    func testSetCustomDataBeforeInitialization() {
+        let af = MPKitAppsFlyer()
+        af.providerKitInstance = nil
+
+        let testData: [String: Any] = ["pre_init_key": "pre_init_val"]
+        MPKitAppsFlyer.setCustomData(testData)
+
+        XCTAssertEqual(MPKitAppsFlyer.customData()?["pre_init_key"] as? String, "pre_init_val")
+
+        af.providerKitInstance = mock
+
+        XCTAssertEqual(mock.lastCustomData?["pre_init_key"] as? String, "pre_init_val")
+    }
+
     func checkLogEventParams() {
         XCTAssertTrue(mock.logEventCalled)
         XCTAssertEqual(mock.logEventEventName, AFEventPurchase)

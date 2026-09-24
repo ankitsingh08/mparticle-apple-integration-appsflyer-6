@@ -28,6 +28,18 @@ class AppsFlyerLibMock: AppsFlyerLib {
         }
     }
 
+    var setCustomDataCallCount = 0
+    var lastCustomData: [AnyHashable: Any]?
+
+    override var customData: [AnyHashable: Any]? {
+        get { super.customData }
+        set {
+            setCustomDataCallCount += 1
+            lastCustomData = newValue
+            super.customData = newValue
+        }
+    }
+
     override func logEvent(_ eventName: String, withValues values: [AnyHashable: Any]?) {
         logEventCalled = true
         logEventEventName = eventName
