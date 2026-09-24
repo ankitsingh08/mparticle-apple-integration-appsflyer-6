@@ -37,6 +37,7 @@ NSString *const kMPAFDefaultAdPersonalizationKey = @"defaultAdPersonalizationCon
 
 static AppsFlyerLib *appsFlyerTracker = nil;
 static id<AppsFlyerLibDelegate> temporaryDelegate = nil;
+static NSDictionary *temporaryCustomData = nil;
 
 @implementation NSString(PRIVATE)
 
@@ -64,6 +65,7 @@ static id<AppsFlyerLibDelegate> temporaryDelegate = nil;
 
 - (void)setProviderKitInstance:(id)tracker {
     appsFlyerTracker = tracker;
+    [MPKitAppsFlyer flushTemporaryCustomDataIfNeeded];
 }
 
 + (void)setDelegate:(id)delegate {
@@ -80,6 +82,29 @@ static id<AppsFlyerLibDelegate> temporaryDelegate = nil;
     }
     else {
         temporaryDelegate = (id<AppsFlyerLibDelegate>)delegate;
+    }
+}
+
++ (void)setCustomData:(NSDictionary * _Nullable)customData {
+    if (appsFlyerTracker) {
+        appsFlyerTracker.customData = customData;
+    } else {
+        temporaryCustomData = customData;
+    }
+}
+
++ (NSDictionary * _Nullable)customData {
+    if (appsFlyerTracker) {
+        return appsFlyerTracker.customData;
+    } else {
+        return temporaryCustomData;
+    }
+}
+
++ (void)flushTemporaryCustomDataIfNeeded {
+    if (temporaryCustomData && appsFlyerTracker) {
+        appsFlyerTracker.customData = temporaryCustomData;
+        temporaryCustomData = nil;
     }
 }
 
@@ -111,7 +136,8 @@ static id<AppsFlyerLibDelegate> temporaryDelegate = nil;
     else {
         appsFlyerTracker.delegate = self;
     }
-    
+    [MPKitAppsFlyer flushTemporaryCustomDataIfNeeded];
+
     appsFlyerTracker.deepLinkDelegate = self;
     
     _configuration = configuration;
